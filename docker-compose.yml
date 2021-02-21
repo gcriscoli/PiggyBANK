@@ -1,0 +1,119 @@
+services:
+  MySQL80:
+    image:
+      mysql:8
+    container_name: MySQL80
+    ports:
+      - "3380:3306"
+    command:  --default-authentication-plugin=mysql_native_password
+    environment:
+      - MYSQL_ROOT_PASSWORD=P455word!
+      - MYSQL_DATABASE=piggybank
+      - MYSQL_USER=piggybank
+      - MYSQL_PASSWORD=piggybank
+    volumes:
+      - MySQL80Data:/var/lib/mysql
+      - "./SourceFiles/Database:/root/MySQLSourceFiles"
+    restart:  unless-stopped
+
+
+  MySQL57:
+    image:
+      mysql:5.7
+    container_name: MySQL57
+    ports:
+      - "3357:3306"
+    command:  --default-authentication-plugin=mysql_native_password
+    environment:
+      - MYSQL_ROOT_PASSWORD=P455word!
+      - MYSQL_DATABASE=piggybank
+      - MYSQL_USER=piggybank
+      - MYSQL_PASSWORD=piggybank
+    volumes:
+      - MySQL57Data:/var/lib/mysql
+      - "./SourceFiles/Database:/root/MySQLSourceFiles"
+    restart:  unless-stopped
+
+  PHPMyAdmin80:
+    image:  phpmyadmin:latest
+    container_name: phpMyAmin80
+    depends_on:
+      - MySQL80
+      - MySQL57
+    environment:
+      - MYSQL_ROOT_PASSWORD=P455word!
+      - MYSQL_USER=piggybank
+      - MYSQL_PASSWORD=piggybank
+      - PMA_HOST=[MySQL80]
+      - PMA_PORT=[3306]
+    ports:
+      - "8083:80"
+    links:
+      - MySQL80
+    restart:  unless-stopped
+
+  PHPMyAdmin57:
+    image:  phpmyadmin:latest
+    container_name: phpMyAmin57
+    depends_on:
+      - MySQL57
+    environment:
+      - MYSQL_ROOT_PASSWORD=P455word!
+      - MYSQL_USER=piggybank
+      - MYSQL_PASSWORD=piggybank
+      - PMA_HOST=[MySQL57]
+      - PMA_PORT=[3306]
+    ports:
+      - "8084:80"
+    links:
+      - MySQL57
+    restart:  unless-stopped
+
+  PHP8:
+    image:  php:8-apache
+    build:
+      context: ./php80
+    container_name: php80
+    depends_on:
+      - MySQL80
+      - MySQL57
+    ports:
+      - "8080:80"
+    volumes:
+      - "./SourceFiles/Application:/var/www/html"
+    links:
+      - MySQL80
+      - MySQL57
+    restart:  unless-stopped
+
+  PHP74:
+    image:  php:7.4-apache
+    build:
+      context: ./php74
+    container_name: php74
+    depends_on:
+      - MySQL80
+      - MySQL57
+    ports:
+      - "8074:80"
+    volumes:
+      - "./SourceFiles/Application:/var/www/html"
+    restart:  unless-stopped
+
+  PHP73:
+    image:  php:7.3-apache
+    build:
+      context: ./php73
+    container_name: php73
+    depends_on:
+      - MySQL80
+      - MySQL57
+    ports:
+      - "8073:80"
+    volumes:
+      - "./SourceFiles/Application:/var/www/html"
+    restart:  unless-stopped
+
+volumes:
+  MySQL57Data:
+  MySQL80Data:
